@@ -1,0 +1,7 @@
+---
+title: "Sentiment and Lexical Diversity Analysis of Song Lyrics: 1958 - 2021"
+author: "Louis Magowan"
+date: "24/01/2022"
+output: html_document
+---
+
