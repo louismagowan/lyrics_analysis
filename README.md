@@ -64,11 +64,11 @@ Uses lyrics from [Billboard Top 100 songs](https://www.kaggle.com/dhruvildave/bi
 Aims to determine if/how song lyrics have changed over time. Lexical diversity analysis is conducted using the Quanteda package, 
 with the [TTR](https://rdrr.io/cran/koRpus/man/TTR.html) and [Maas](https://rdrr.io/cran/koRpus/man/maas.html) measures.
 
-Sentiment analysis run using [IBM's tone analyser](https://www.ibm.com/uk-en/cloud/watson-tone-analyzer)
+Sentiment analysis run using [IBM's tone analyser](https://www.ibm.com/uk-en/cloud/watson-tone-analyzer).
 
 Songs appear to have become less joyful, angrier and simpler.
 
-To analyse / play about with the data yourself, please check out the [Data Studio dashboard](https://datastudio.google.com/reporting/428bdb5c-8375-4566-a013-e8f7a3821256)
+To analyse / play about with the data yourself, please check out the [Data Studio dashboard](https://datastudio.google.com/reporting/428bdb5c-8375-4566-a013-e8f7a3821256).
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
