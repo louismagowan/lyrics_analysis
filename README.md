@@ -21,7 +21,7 @@
 
 
 
-<h3 align="center">Song Lyrics Over Time: Lexical Diversity and Sentiment Analysis</h3>
+<h3 align="center">Song Lyrics Over Time: Lexical Diversity and Sentiment Analysis in R</h3>
 
   <p align="center">
     Using Quanteda, IBM Tone Analyzer and ggplot2 to analyse top 100 song lyrics in the US from 1958.
