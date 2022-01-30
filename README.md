@@ -21,7 +21,6 @@
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
 
@@ -30,7 +29,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/louismagowan/lyrics_analysis">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="https://i.kym-cdn.com/entries/icons/original/000/033/421/cover2.jpg" alt="Logo" width="80" height="80">
   </a>
 
 <h3 align="center">project_title</h3>
@@ -38,11 +37,7 @@
   <p align="center">
     project_description
     <br />
-    <a href="https://github.com/louismagowan/lyrics_analysis"><strong>Explore the docs »</strong></a>
     <br />
-    <br />
-    <a href="https://github.com/louismagowan/lyrics_analysis">View Demo</a>
-    ·
     <a href="https://github.com/louismagowan/lyrics_analysis/issues">Report Bug</a>
     ·
     <a href="https://github.com/louismagowan/lyrics_analysis/issues">Request Feature</a>
