@@ -60,7 +60,13 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `louismagowan`, `lyrics_analysis`, `twitter_handle`, `linkedin_username`, `email`, `email_client`, `project_title`, `project_description`
+Uses lyrics from Billboard Top 100 songs from 1958 in the US to do sentiment and lexical diversity analysis. 
+Aims to determine if/how song lyrics have changed over time. Lexical diversity analysis is conducted using the Quanteda package, 
+with the [TTR](https://rdrr.io/cran/koRpus/man/TTR.html) and [Maas](https://rdrr.io/cran/koRpus/man/maas.html) measures.
+
+Sentiment analysis run using [IBM's tone analyser](https://www.ibm.com/uk-en/cloud/watson-tone-analyzer)
+
+Songs appear to have become less joyful, angrier and simpler.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -72,7 +78,7 @@ Here's a blank template to get started: To avoid retyping too much info. Do a se
 * [Data Studio](https://datastudio.google.com/reporting/428bdb5c-8375-4566-a013-e8f7a3821256)
 * [plotly](https://plotly.com/r/)
 * [httr](https://cran.r-project.org/web/packages/httr/vignettes/quickstart.html)
-* [IBM Tone Analyzer](https://svelte.dev/)
+* [IBM Tone Analyzer](https://www.ibm.com/uk-en/cloud/watson-tone-analyzer)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -81,32 +87,21 @@ Here's a blank template to get started: To avoid retyping too much info. Do a se
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+Make sure you've done this setup before you try to run the code yourself.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
+Install Quanteda packages in R environment.
+* R
+  ```r
+  install.packages("quanteda")
+  install.packages("quanteda.textstats")
+  install.packages("quanteda.textmodels")
   ```
 
-### Installation
-
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
-   ```sh
-   git clone https://github.com/louismagowan/lyrics_analysis.git
-   ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
+* IBM Cloud Account
+  Create a free IBM Cloud Account and use the $200 USD credit they give you to create a Tone Analyzer instance,
+  if you want to run the sentiment analysis yourself. [IBM Tone Analyzer](https://www.ibm.com/uk-en/cloud/watson-tone-analyzer)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
