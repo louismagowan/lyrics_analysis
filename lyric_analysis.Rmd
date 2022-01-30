@@ -5,3 +5,356 @@ date: "24/01/2022"
 output: html_document
 ---
 
+**Sources **
+
++ [Song lyrics API](https://api.lyrics.ovh/v1/)
++ [IBM's Tone Analyzer API](https://www.ibm.com/uk-en/cloud/watson-tone-analyzer): Used to do sentiment analysis on the song lyrics, using a free trial account with the $200 USD credit they give. [Full description of IBM Tone Analyzer tones](https://cloud.ibm.com/docs/tone-analyzer?topic=tone-analyzer-utgpe)
++ [Kaggle dataset containing all of Billboard's top 100 songs](https://www.kaggle.com/dhruvildave/billboard-the-hot-100-songs)
+
+
+**Load packages**
+```{r packages, warning=FALSE}
+packages <- c("tidyverse", "httr", 
+              "quanteda", "quanteda.textstats",
+              "quanteda.textmodels",
+              "plotly", "ggthemes")
+
+suppressMessages(invisible(lapply(packages, library, character.only=TRUE)))
+
+# Suppress summarise info
+options(dplyr.summarise.inform = FALSE)
+```
+
+
+# Load Data
+
+## Get Billboard Top 100 Songs 1958 - 2021
+```{r load_billboard}
+# Get list of top 100 US songs since 1958 and process for lyrics API
+# Read in Billboard hot 100 songs
+billboard <- read.csv("billboard_hot_100.csv")
+# Select needed cols
+billboard <- billboard %>% select(date, artist, song)
+# Drop all the repeated data
+billboard <- billboard %>% distinct(artist, song, .keep_all = TRUE)
+# Process the columns into URL encoding format
+billboard$artist_url <- billboard$artist %>%
+  str_replace_all(" ", "%20") %>%
+  paste0("/")
+billboard$song_url <- billboard$song %>%
+  str_replace_all(" ", "%20") %>%
+  paste0("/")
+# Merge the two url encoded cols
+billboard$url <- paste0(billboard$artist_url, billboard$song_url)
+
+# Create column to add lyrics to
+billboard$lyrics <- 0
+```
+
+## Get Lyrics
+
+__Pull lyrics for each song in the billboard top 100s over the years with lyrics.ovh API. This took ~ 8 hours, so the results have been saved into a csv for knitting purposes. Many of the songs didn't return lyrics (45%), most likely due to inconsistencies in song and artist names- however the sample is still sufficiently large (16K songs, 1958 - 2021).__
+```{r get_lyrics, eval=FALSE}
+# Make requests to lyrics API
+base_url <- "https://api.lyrics.ovh/v1/"
+
+# Add counter to check calls are working with
+counter = 0
+for (i in 1:length(billboard$url)){
+
+  # Get the url string to add to the base
+  song_url <- billboard$url[i]
+  # Construct the full request URL for that song
+  full_url <- paste0(base_url, song_url)
+  # Make request
+  r <- GET(full_url)
+  # Increment counter
+  counter <- counter + 1
+  # If the request was okay, add lyrics
+  if (r$status_code == 200){
+    # Need to process the data slightly, often they include this source line
+    lyrics <- content(r)$lyrics %>%
+      str_replace("Paroles de la chanson.*\r\n", "")
+    # Add song's lyrics
+    billboard$lyrics[i] <- lyrics
+    # If rate-limited, break and display where limit happened
+    # No rate-limit occurred in full 8 hours
+  } else if (r$status_code == 429){
+    cat("Rate-limited on: ", counter)
+    break
+  }
+  # Add intermediate saves to store data in case something goes wrong
+  # Also display the counter every 500 calls to check it's running
+  if (counter %% 500 == 0){
+    print(counter)
+    write.csv(billboard, "lyrics_raw.csv", row.names = FALSE)
+  }
+}
+# Save to a csv
+write.csv(billboard, "lyrics_raw.csv", row.names = FALSE)
+```
+
+```{r process_lyrics}
+# Read in the lyrics data
+billboard <- read.csv("lyrics_raw.csv")
+# Select needed columns
+billboard <- billboard %>% select(date, artist, song, lyrics) %>% 
+  # Remove songs that didn't return lyrics
+  filter(lyrics != 0)
+# Add year col for joining
+billboard$year <- billboard$date %>% substr(1, 4)
+
+# Rename date col
+billboard <- billboard %>% rename(song_date = date)
+```
+
+## Sentiment Analysis with IBM Watson
+
+__Use IBM Watson Tone Analyser to do sentiment analysis on each song: Many songs were unable to have their sentiment analysed, or else didn't produce strong results for any one sentiment. This also took a long time, and used up a lot of the $200 free credit they gave.__
+
+```{r sentiment_api, eval=FALSE}
+# Enter params for the request
+ibm_key <- "mind_your_own_beeswax"
+ibm_url <- "https://api.eu-gb.tone-analyzer.watson.cloud.ibm.com/instances/mind_your_own_beeswax_again/v3/tone"
+ibm_version = "2017-09-21"
+
+# Construct df to append IBM data to
+tone_df <- data.frame()
+# Add counter to check calls are working with
+counter = 0
+# Iterate through each song's lyrics, analysing sentiment
+for (i in 1:length(billboard$lyrics)){
+  # Get lyrics of current song
+  current_song <-  billboard$lyrics[i]
+  # Add lyrics to params for URL / request
+  # The URL encoding of the lyrics is taken care of by the GET function
+  params = list(
+  version = '2017-09-21',
+  text = current_song)
+  # Increment counter
+  counter <- counter + 1
+
+  # Make the request
+  r <- GET(url = ibm_url,
+           query = params,
+           authenticate('apikey', ibm_key))
+
+   # If the request was okay, add lyrics
+  if (r$status_code == 200){
+    # Parse the data
+    parsed_r <- fromJSON(rawToChar(r$content))
+    # Merge tone data with billboard data into new df
+    tone_df <- parsed_r$document_tone$tones %>%
+      bind_cols(billboard[i, ]) %>%
+      bind_rows(tone_df)
+
+    # Check for auth errors etc
+  } else if (r$status_code == 401) {
+    cat("API requests stopped on number : ", counter,
+        "\n Status: ", r$status_code, "\n")
+    write.csv(tone_df, "tone_raw.csv", row.names = FALSE)
+    break
+  }
+    # Add intermediate saves to store data in case something goes wrong
+  # Also display the counter every 500 calls to check it's running
+  if (counter %% 500 == 0){
+    cat(counter, " Status: ", r$status_code)
+    write.csv(tone_df, "tone_raw.csv", row.names = FALSE)
+  }
+}
+# Save the data in a csv
+write.csv(tone_df, "tone_raw.csv", row.names = FALSE)
+```
+
+```{r}
+# Read in the saved sentiment analysis data
+tone_df <- read.csv("tone_raw.csv")
+# Drop the rows for which sentiment couldn't be analysed
+tone_df <- tone_df[complete.cases(tone_df), ]
+# Add year col for joining
+tone_df$year <- tone_df$song_date %>% substr(1, 4)
+# Select the needed columns and reorder
+tone_df <-  tone_df %>% select(year, artist, song, tone_name, score)
+```
+
+## Merge Data and Process
+
+```{r}
+# Merge sentiment data with song data
+all_df <- merge(tone_df, billboard, by = c("artist", "song", "year"))
+# Make dates into date type
+all_df$year <- all_df$year %>% paste0("-01-01") %>% as.Date()
+all_df$song_date <- all_df$song_date %>% as.Date()
+```
+
+
+# Analyze Data
+
+## Visualise Changes in Sentiment
+__Plot trends in key sentiments over time. Lyrics appear to have become less joyful, angrier and slightly more fearful.__
+```{r}
+# Find the average sentiment scores by year
+sent_df <- all_df %>% 
+  # Just look at these 3 significant emotions
+  filter(tone_name %in% c("Anger", "Joy", "Fear")) %>% 
+  group_by(year, tone_name) %>% 
+  summarise(mean_score = mean(score,
+                              na.rm = TRUE))
+# Plot the average sentiment scores over time
+sentiment_plot <- ggplot(data = sent_df,
+                         aes(x = year,
+                             y = mean_score,
+                             color = tone_name))  +
+  # Add points
+  geom_point(size = 0.75, alpha = 0.75) + 
+  # Add linear trend lines
+  geom_smooth(formula = "y ~ x", method = "lm") +
+  
+  # Add titles and labels
+  labs(title = "Sentiments in Song Lyrics Over Time",
+       color = "Sentiment") +
+  ylab("Sentiment Strength") + 
+  # Adjust theme
+  theme(legend.title = element_text(face = "bold"),
+        axis.title.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text = element_text(face = "bold",
+                                   size = 8),
+        axis.ticks.y = element_blank(),
+        plot.title = element_text(face = "bold"),
+        text = element_text(family = "Sans")
+        )
+
+# Make into interactive graph
+ggplotly(sentiment_plot)
+```
+
+[Group by decade](https://stackoverflow.com/questions/47799182/grouping-data-in-r-and-summing-by-decade)
+
+__Plot key sentiments by decade.__
+```{r}
+# Facet bars
+decade_sent <- all_df %>% 
+  filter(tone_name %in% c("Joy", "Sadness", "Anger", "Fear")) %>%
+  mutate(decade = floor(as.numeric(substr(year, 1, 4))/10)*10) %>% 
+      group_by(decade, tone_name) %>% 
+      summarise(mean_score = mean(score,
+                                  na.rm = TRUE)) %>%
+  # Remove incomplete decades
+  filter(!decade %in% c(1950, 2020))
+# Plot mean sentiment by decade
+ggplot(data = decade_sent,
+       aes(x = tone_name,
+           y = mean_score,
+           fill = tone_name)) +
+  # Add bars
+  geom_bar(stat = "identity") +
+  # Annotate bars
+  geom_text(aes(label = round(mean_score, 2)),
+           position = position_dodge(width = 0.9),
+           vjust=-0.5) + 
+  # Facet by decade
+  facet_wrap(~decade) +
+  # Adjust graph limits
+  coord_cartesian(ylim = c(0.55, 0.725)) + 
+
+  # Add titles and labels
+  labs(title = "Sentiments in Song Lyrics By Decade",
+       fill = "Sentiment") +
+  ylab("Sentiment Strength") + 
+  # Adjust theme
+  theme(legend.title = element_text(face = "bold"),
+        axis.title.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text = element_text(face = "bold",
+                                   size = 8),
+        axis.ticks.y = element_blank(),
+        plot.title = element_text(face = "bold"),
+        )
+```
+## Analyze Lexical Diversity
+
+__Evaluate lexical diversity of lyrics over time.__
+```{r}
+# Make lyrics into a corpus
+lyric_corpus <- corpus(billboard, text_field = "lyrics")
+
+# Get number of tokens in each song
+docvars(lyric_corpus)$ntoken <- lyric_corpus %>% ntoken()
+# Filter out the songs with barely any lyrics
+lyric_corpus <- corpus_subset(lyric_corpus, ntoken > 50)
+
+# Tokenize lyrics and calculate lexical diveristy
+lexdiv <- lyric_corpus %>%
+  # Remove numbers and punctuation
+  tokens(remove_punct = TRUE,
+         remove_numbers = TRUE,
+         remove_symbols = TRUE) %>%
+  # Make all lowercase
+  tokens_tolower() %>% 
+  textstat_lexdiv(measure = c("TTR", "Maas"))
+
+# Merge lexical diversity measures into docvars
+lexdiv <- bind_cols(docvars(lyric_corpus), lexdiv[, 2:3])
+# Make year into date
+lexdiv$year <- lexdiv$year %>% paste0("-01-01") %>% as.Date()
+
+# Make into long format for plotting
+lexdiv <- lexdiv %>% pivot_longer(c(TTR, Maas),
+                                names_to = "lexdiv_measure",
+                                values_to = "lexdiv_value"
+                                )
+
+# Group by year
+lexdiv_grouped <- lexdiv %>% group_by(year, lexdiv_measure) %>%
+  summarise(lexdiv_value = mean(lexdiv_value, 
+                       na.rm = TRUE))
+
+```
+
+## Visualise Changes in Lexical Diversity
+
+__Both measures show a decline in lexical diversity over time. The steeper decline when using TTR may be a statistical artefact however (see below).__
+```{r}
+# Plot lexical diversity over time
+ggplot(lexdiv_grouped, aes(x = year,
+                           y = lexdiv_value,
+                           color = lexdiv_measure)) + 
+  # Add line
+  geom_line(size = 1) +
+  # Add trend lines
+  geom_line(stat = "smooth",
+            formula = "y~x",
+            method = "lm",
+            alpha = 0.5) +
+  # Change ylabel
+  scale_y_continuous(name = "TTR or Maas Index\n") +
+   # Add titles and labels
+  labs(title = "Average Lexical Diversity in Song Lyrics Over Time",
+       color = "Lexical Diversity Measure") +
+  xlab("") + 
+  # Adjust theme
+  theme_economist()
+```
+
+__TTR had decreased quite a lot. If you look at the average number of words in a song however, we see that this is likely to be partly down to an artefact of how TTR is calculated. TTR is unique tokens divided by total tokens- so longer pieces of text may tend towards less lexical diversity in terms of TTR. The Maas measure tries to compensate for varying text sample sizes and produces a more humble decline in lexical diversity over time. __
+
+[Quanteda: Notes on lexical diversity (TTR, Maas and more)](https://quanteda.io/reference/textstat_lexdiv.html)
+```{r}
+# Group by year to get average number of tokens
+ntoken <- lexdiv %>% group_by(year) %>% summarise(ntoken = mean(ntoken,
+                                                                na.rm = TRUE))
+# Plot average number of tokesn over time
+ggplot(ntoken, aes(x = year,
+                           y = ntoken,
+                           )) + 
+  # Add line
+  geom_line(size = 0.8, color = "orange") +
+  # Change ylab
+  scale_y_continuous(name = "Number of Words in A Song\n") +
+   # Add titles and labels
+  labs(title = "Average Number of Words in a Song Over Time") +
+  xlab("") + 
+  # Add theme
+  theme_economist()
+```
