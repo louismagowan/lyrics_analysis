@@ -110,7 +110,7 @@ billboard <- billboard %>% rename(song_date = date)
 
 ## Sentiment Analysis with IBM Watson
 
-__Use IBM Watson Tone Analyser to do sentiment analysis on each song: Many songs were unable to have their sentiment analysed, or else didn't produce strong results for any one sentiment. This also took a long time, and used up a lot of the $200 free credit they gave.__
+__Use IBM Watson Tone Analyser to do sentiment analysis on each song: Many songs were unable to have their sentiment analysed, or else didn't produce strong results for any one sentiment. This also took a long time, and used up a lot of the $200 free credit they gave. Replace the "mind_your_own_beeswax" with your own API key.__
 
 ```{r sentiment_api, eval=FALSE}
 # Enter params for the request
@@ -166,7 +166,7 @@ for (i in 1:length(billboard$lyrics)){
 write.csv(tone_df, "tone_raw.csv", row.names = FALSE)
 ```
 
-```{r}
+```{r process_sentiment}
 # Read in the saved sentiment analysis data
 tone_df <- read.csv("tone_raw.csv")
 # Drop the rows for which sentiment couldn't be analysed
@@ -179,7 +179,7 @@ tone_df <-  tone_df %>% select(year, artist, song, tone_name, score)
 
 ## Merge Data and Process
 
-```{r}
+```{r combine_all_data}
 # Merge sentiment data with song data
 all_df <- merge(tone_df, billboard, by = c("artist", "song", "year"))
 # Make dates into date type
@@ -192,7 +192,7 @@ all_df$song_date <- all_df$song_date %>% as.Date()
 
 ## Visualise Changes in Sentiment
 __Plot trends in key sentiments over time. Lyrics appear to have become less joyful, angrier and slightly more fearful.__
-```{r}
+```{r sent_over_time}
 # Find the average sentiment scores by year
 sent_df <- all_df %>% 
   # Just look at these 3 significant emotions
@@ -232,7 +232,7 @@ ggplotly(sentiment_plot)
 [Group by decade](https://stackoverflow.com/questions/47799182/grouping-data-in-r-and-summing-by-decade)
 
 __Plot key sentiments by decade.__
-```{r}
+```{r sent_by_decade}
 # Facet bars
 decade_sent <- all_df %>% 
   filter(tone_name %in% c("Joy", "Sadness", "Anger", "Fear")) %>%
@@ -275,7 +275,7 @@ ggplot(data = decade_sent,
 ## Analyze Lexical Diversity
 
 __Evaluate lexical diversity of lyrics over time.__
-```{r}
+```{r lexdiv}
 # Make lyrics into a corpus
 lyric_corpus <- corpus(billboard, text_field = "lyrics")
 
@@ -292,6 +292,7 @@ lexdiv <- lyric_corpus %>%
          remove_symbols = TRUE) %>%
   # Make all lowercase
   tokens_tolower() %>% 
+  # Calculate lexical diversity using quanteda
   textstat_lexdiv(measure = c("TTR", "Maas"))
 
 # Merge lexical diversity measures into docvars
@@ -315,7 +316,7 @@ lexdiv_grouped <- lexdiv %>% group_by(year, lexdiv_measure) %>%
 ## Visualise Changes in Lexical Diversity
 
 __Both measures show a decline in lexical diversity over time. The steeper decline when using TTR may be a statistical artefact however (see below).__
-```{r}
+```{r lexdiv_over_time}
 # Plot lexical diversity over time
 ggplot(lexdiv_grouped, aes(x = year,
                            y = lexdiv_value,
@@ -340,7 +341,7 @@ ggplot(lexdiv_grouped, aes(x = year,
 __TTR had decreased quite a lot. If you look at the average number of words in a song however, we see that this is likely to be partly down to an artefact of how TTR is calculated. TTR is unique tokens divided by total tokens- so longer pieces of text may tend towards less lexical diversity in terms of TTR. The Maas measure tries to compensate for varying text sample sizes and produces a more humble decline in lexical diversity over time. __
 
 [Quanteda: Notes on lexical diversity (TTR, Maas and more)](https://quanteda.io/reference/textstat_lexdiv.html)
-```{r}
+```{r ntoken_over_time}
 # Group by year to get average number of tokens
 ntoken <- lexdiv %>% group_by(year) %>% summarise(ntoken = mean(ntoken,
                                                                 na.rm = TRUE))

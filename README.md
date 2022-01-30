@@ -1,10 +1,6 @@
 <div id="top"></div>
 <!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
-*** that would make this better, please fork the repo and create a pull request
-*** or simply open an issue with the tag "enhancement".
-*** Don't forget to give the project a star!
-*** Thanks again! Now go create something AMAZING! :D
+*** Copied from https://github.com/othneildrew/Best-README-Template/blob/master/BLANK_README.md
 -->
 
 
@@ -25,22 +21,17 @@
 
 
 
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-  <a href="https://github.com/louismagowan/lyrics_analysis">
-    <img src="https://i.kym-cdn.com/entries/icons/original/000/033/421/cover2.jpg" alt="Logo" width="80" height="80">
-  </a>
-
-<h3 align="center">project_title</h3>
+<h3 align="center">Song Lyrics Over Time: Lexical Diversity and Sentiment Analysis</h3>
 
   <p align="center">
-    project_description
+    Using Quanteda, IBM Tone Analyzer and ggplot2 to analyse top 100 song lyrics in the US from 1958.
     <br />
     <br />
     <a href="https://github.com/louismagowan/lyrics_analysis/issues">Report Bug</a>
     ·
     <a href="https://github.com/louismagowan/lyrics_analysis/issues">Request Feature</a>
+    ·
+    <a href="https://datastudio.google.com/reporting/428bdb5c-8375-4566-a013-e8f7a3821256">Data Studio Dashboard</a>
   </p>
 </div>
 
@@ -69,8 +60,6 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
-
 Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `louismagowan`, `lyrics_analysis`, `twitter_handle`, `linkedin_username`, `email`, `email_client`, `project_title`, `project_description`
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -79,14 +68,11 @@ Here's a blank template to get started: To avoid retyping too much info. Do a se
 
 ### Built With
 
-* [Next.js](https://nextjs.org/)
-* [React.js](https://reactjs.org/)
-* [Vue.js](https://vuejs.org/)
-* [Angular](https://angular.io/)
-* [Svelte](https://svelte.dev/)
-* [Laravel](https://laravel.com)
-* [Bootstrap](https://getbootstrap.com)
-* [JQuery](https://jquery.com)
+* [Quanteda](https://quanteda.io/index.html)
+* [Data Studio](https://datastudio.google.com/reporting/428bdb5c-8375-4566-a013-e8f7a3821256)
+* [plotly](https://plotly.com/r/)
+* [httr](https://cran.r-project.org/web/packages/httr/vignettes/quickstart.html)
+* [IBM Tone Analyzer](https://svelte.dev/)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -126,24 +112,12 @@ This is an example of how to list things you need to use the software and how to
 
 
 
-<!-- USAGE EXAMPLES -->
-## Usage
-
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
-_For more examples, please refer to the [Documentation](https://example.com)_
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
 <!-- ROADMAP -->
 ## Roadmap
 
 - [ ] Genre-level analysis
-- [ ] Feature 2
-- [ ] Feature 3
-    - [ ] Nested Feature
+- [ ] Analysis of more songs, top 100 in other countries
+    - [ ] Country-level comparison
 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -167,10 +141,6 @@ Don't forget to give the project a star! Thanks again!
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
-
-
-
-
 <!-- CONTACT -->
 ## Contact
 
@@ -185,9 +155,10 @@ Project Link: [https://github.com/louismagowan/lyrics_analysis](https://github.c
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* []()
-* []()
-* []()
+* [othneildrew - README template](https://github.com/othneildrew/Best-README-Template/blob/master/BLANK_README.md)
+* [Group By Decade](https://stackoverflow.com/questions/47799182/grouping-data-in-r-and-summing-by-decade)
+* [Lyrics API](https://api.lyrics.ovh/v1/)
+* [Dhruvil Dave, Billboard Top 100 Songs](https://www.kaggle.com/dhruvildave/billboard-the-hot-100-songs)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -206,5 +177,5 @@ Project Link: [https://github.com/louismagowan/lyrics_analysis](https://github.c
 [license-shield]: https://img.shields.io/github/license/louismagowan/lyrics_analysis.svg?style=for-the-badge
 [license-url]: https://github.com/louismagowan/lyrics_analysis/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/linkedin_username
+[linkedin-url]: https://www.linkedin.com/in/louismagowan/
 [product-screenshot]: images/screenshot.png

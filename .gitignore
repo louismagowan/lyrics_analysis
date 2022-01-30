@@ -1,5 +1,7 @@
 # Mac crap
 .DS_Store
+# Data Studio files
+ds_data.csv
 # History files
 .Rhistory
 .Rapp.history
