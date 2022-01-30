@@ -27,11 +27,11 @@
     Using Quanteda, IBM Tone Analyzer and ggplot2 to analyse top 100 song lyrics in the US from 1958.
     <br />
     <br />
-    <a href="https://github.com/louismagowan/lyrics_analysis/issues">Report Bug</a>
+    <a href="https://datastudio.google.com/reporting/428bdb5c-8375-4566-a013-e8f7a3821256">Data Studio Dashboard</a>
     ·
     <a href="https://github.com/louismagowan/lyrics_analysis/issues">Request Feature</a>
     ·
-    <a href="https://datastudio.google.com/reporting/428bdb5c-8375-4566-a013-e8f7a3821256">Data Studio Dashboard</a>
+    <a href="https://github.com/louismagowan/lyrics_analysis/issues">Report Bug</a>
   </p>
 </div>
 
@@ -60,7 +60,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-Uses lyrics from Billboard Top 100 songs from 1958 in the US to do sentiment and lexical diversity analysis. 
+Uses lyrics from [Billboard Top 100 songs](https://www.kaggle.com/dhruvildave/billboard-the-hot-100-songs) from 1958 in the US to do sentiment and lexical diversity analysis. 
 Aims to determine if/how song lyrics have changed over time. Lexical diversity analysis is conducted using the Quanteda package, 
 with the [TTR](https://rdrr.io/cran/koRpus/man/TTR.html) and [Maas](https://rdrr.io/cran/koRpus/man/maas.html) measures.
 
